@@ -92,8 +92,8 @@ def ingest(file_name, file, upload, folder):
     # createdTime = file['createdTime']
     # modifiedTime = file['modifiedTime']
 
-    package = simple_asset_package(preservation_file=file_name, Title=title, Identifiers=identifiers)
-    upload.upload_zip_package(path_to_zip_package=package, delete_after_upload=True)
+    package = simple_asset_package(preservation_file=file_name, parent_folder=folder,  Title=title, Identifiers=identifiers)
+    upload.upload_zip_package(path_to_zip_package=package, folder=folder,   delete_after_upload=True)
 
 
 def main():
