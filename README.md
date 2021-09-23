@@ -5,3 +5,9 @@ Preservica authentication is via properties file:  https://pypreservica.readthed
 
 Google Drive authentication is via OAuth 2.0 json file:  https://developers.google.com/identity/protocols/oauth2
 
+Requires the following python packages
+
+pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
+pip install --upgrade pyPreservica
+
+
