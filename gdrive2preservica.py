@@ -82,19 +82,30 @@ def export_file(service, file):
         return file_name
 
 
-def ingest(file_name, file, upload, folder):
+def ingest(file_name, file, upload, folder, entity):
     identifiers = {"google-drive-id": file['id']}
     title = file['name']
 
-    # create XML schema from metadata attributes?
-    # version = file['version']
-    # viewedByMeTime = file['viewedByMeTime']
-    # createdTime = file['createdTime']
-    # modifiedTime = file['modifiedTime']
+    xml_object = xml.etree.ElementTree.Element('drive', {"xmlns": "https://drive.google.com/preservica"})
+    xml.etree.ElementTree.SubElement(xml_object, "version").text = file.get('version', '')
+    xml.etree.ElementTree.SubElement(xml_object, "viewedByMeTime").text = file.get('viewedByMeTime', '')
+    xml.etree.ElementTree.SubElement(xml_object, "createdTime").text = file.get('createdTime', '')
+    xml.etree.ElementTree.SubElement(xml_object, "modifiedTime").text = file.get('modifiedTime', '')
 
-    package = simple_asset_package(preservation_file=file_name, parent_folder=folder,  Title=title, Identifiers=identifiers)
-    upload.upload_zip_package(path_to_zip_package=package, folder=folder,   delete_after_upload=True)
+    xml_request = xml.etree.ElementTree.tostring(xml_object, encoding='utf-8').decode('utf-8')
 
+    with open('metadata.xml', 'wt', encoding="utf-8") as f:
+        f.write(xml_request)
+
+    metadata = {"https://drive.google.com/preservica": 'metadata.xml'}
+
+    existing_entities = entity.identifier("google-drive-id", file['id'])
+    if len(existing_entities) == 0:
+        package = simple_asset_package(preservation_file=file_name, Title=title, Identifiers=identifiers,
+                                       parent_folder=folder, Asset_Metadata=metadata)
+        upload.upload_zip_package(path_to_zip_package=package, delete_after_upload=True, folder=folder,
+                                  callback=UploadProgressCallback(package))
+        os.remove('metadata.xml')
 
 def main():
     # authenticate with google drive
